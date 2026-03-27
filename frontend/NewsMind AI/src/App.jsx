@@ -15,12 +15,15 @@ function App() {
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [started, setStarted] = useState(false);
   const [articles, setArticles] = useState([]);
+  const [savedArticleIds, setSavedArticleIds] = useState([]);
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsError, setNewsError] = useState('');
 
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [messages, setMessages] = useState([]);
+
+  const userId = 'demo-user';
 
   const profileLine = useMemo(() => {
     if (!selectedInterests.length) return `${capitalize(selectedPersona)} view`;
@@ -33,14 +36,34 @@ function App() {
     );
   };
 
+  const toggleSaved = (articleId) => {
+    setSavedArticleIds((prev) =>
+      prev.includes(articleId) ? prev.filter((id) => id !== articleId) : [...prev, articleId]
+    );
+  };
+
   const launchNewsroom = async () => {
     if (!selectedInterests.length) {
       window.alert('Select at least one interest');
       return;
     }
 
+    await saveProfile();
     setStarted(true);
     await fetchNews();
+  };
+
+  const saveProfile = async () => {
+    await fetch(`${API_BASE}/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        persona: selectedPersona,
+        roleType: selectedPersona,
+        interests: selectedInterests
+      })
+    });
   };
 
   const fetchNews = async () => {
@@ -49,6 +72,7 @@ function App() {
       setNewsError('');
 
       const params = new URLSearchParams({
+        userId,
         persona: selectedPersona,
         interests: selectedInterests.join(',')
       });
@@ -80,7 +104,7 @@ function App() {
       const response = await fetch(`${API_BASE}/askNews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: clean, persona: selectedPersona })
+        body: JSON.stringify({ question: clean, persona: selectedPersona, userId })
       });
 
       if (!response.ok) {
@@ -160,14 +184,27 @@ function App() {
           <p className="muted">{profileLine}</p>
         </div>
 
-        <button className="ghost-btn" type="button" onClick={() => setStarted(false)}>
-          Change Profile
-        </button>
+        <div className="navbar-actions">
+          <button className="ghost-btn" type="button" onClick={() => void fetchNews()}>
+            Refresh feed
+          </button>
+          <button className="ghost-btn" type="button" onClick={() => setStarted(false)}>
+            Change Profile
+          </button>
+        </div>
       </div>
 
       <div className="container">
         <main className="news">
-          {newsLoading && <p>Building your personalized newsroom...</p>}
+          {newsLoading &&
+            Array.from({ length: 6 }).map((_, idx) => (
+              <article className="card skeleton" key={`sk-${idx}`} aria-hidden="true">
+                <div className="line short" />
+                <div className="line" />
+                <div className="line" />
+                <div className="line short" />
+              </article>
+            ))}
           {newsError && !newsLoading && <p>{newsError}</p>}
 
           {!newsLoading && !newsError && articles.length === 0 && <p>No stories found for this profile.</p>}
@@ -185,6 +222,11 @@ function App() {
                 <p>{article.summary || article.description || 'No summary available'}</p>
 
                 <div className="insight">
+                  <strong>Context</strong>
+                  <p>{article.explanation || 'No context available yet'}</p>
+                </div>
+
+                <div className="insight">
                   <strong>Why this matters to you</strong>
                   <p>{article.whyItMatters || 'No personalized insight yet'}</p>
                 </div>
@@ -198,6 +240,10 @@ function App() {
                     onClick={() => askAI(`Give me the key risk and opportunity from: ${article.title}`)}
                   >
                     Analyze
+                  </button>
+
+                  <button className="secondary" type="button" onClick={() => toggleSaved(article.id)}>
+                    {savedArticleIds.includes(article.id) ? 'Saved ✓' : 'Save'}
                   </button>
 
                   <a className="link-btn" href={article.url || '#'} target="_blank" rel="noreferrer">
