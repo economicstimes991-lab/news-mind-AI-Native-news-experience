@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NewsMind AI</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Firebase (module support) -->
+  <script type="module" src="firebase.js"></script>
 </head>
 <body>
 
@@ -14,10 +17,10 @@
     <p>Select your interests</p>
 
     <div class="interests">
-      <button class="interest-btn">Tech</button>
-      <button class="interest-btn">Sports</button>
-      <button class="interest-btn">Business</button>
-      <button class="interest-btn">Health</button>
+      <button class="interest-btn" data-value="technology">Tech</button>
+      <button class="interest-btn" data-value="sports">Sports</button>
+      <button class="interest-btn" data-value="business">Business</button>
+      <button class="interest-btn" data-value="health">Health</button>
     </div>
 
     <button id="start-btn">Get My News</button>
@@ -58,26 +61,7 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- IMPORTANT: use module -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
-
-
- 
-
-
-
-
- 
-
-
- 
-
- 
-
-
- 
-
-
- 
- 
