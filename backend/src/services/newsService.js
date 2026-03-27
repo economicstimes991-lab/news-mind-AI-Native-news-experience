@@ -1,7 +1,8 @@
 const NewsAPI = require('newsapi');
 
-const hasNewsKey = Boolean(process.env.NEWS_API_KEY);
-const newsapi = hasNewsKey ? new NewsAPI(process.env.NEWS_API_KEY) : null;
+const hasNewsApiKey = Boolean(process.env.NEWS_API_KEY);
+const hasGNewsKey = Boolean(process.env.GNEWS_API_KEY);
+const newsapi = hasNewsApiKey ? new NewsAPI(process.env.NEWS_API_KEY) : null;
 
 const mockArticles = [
   {
@@ -36,28 +37,62 @@ const mockArticles = [
   }
 ];
 
-async function fetchBusinessNews() {
-  if (!hasNewsKey) {
-    return mockArticles;
-  }
+function normalizeArticle(a, idx) {
+  return {
+    id: `${a.source?.id || a.source?.name || 'src'}-${idx}`,
+    title: a.title,
+    description: a.description,
+    url: a.url,
+    source: a.source?.name || a.source || 'Unknown source',
+    publishedAt: a.publishedAt,
+    imageUrl: a.urlToImage || a.image || '',
+    content: a.content
+  };
+}
 
+async function fetchFromNewsApi() {
   const res = await newsapi.v2.topHeadlines({
     category: 'business',
     language: 'en',
     country: 'us',
-    pageSize: 20
+    pageSize: 30
   });
 
-  return (res.articles || []).map((a, idx) => ({
-    id: `${a.source.id || 'src'}-${idx}`,
-    title: a.title,
-    description: a.description,
-    url: a.url,
-    source: a.source.name,
-    publishedAt: a.publishedAt,
-    imageUrl: a.urlToImage,
-    content: a.content
-  }));
+  return (res.articles || []).map(normalizeArticle);
+}
+
+async function fetchFromGNews() {
+  const url = new URL('https://gnews.io/api/v4/top-headlines');
+  url.searchParams.set('token', process.env.GNEWS_API_KEY);
+  url.searchParams.set('topic', 'business');
+  url.searchParams.set('lang', 'en');
+  url.searchParams.set('country', 'us');
+  url.searchParams.set('max', '30');
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    throw new Error(`GNews request failed (${response.status})`);
+  }
+
+  const body = await response.json();
+  return (body.articles || []).map(normalizeArticle);
+}
+
+async function fetchBusinessNews() {
+  try {
+    if (hasNewsApiKey) {
+      return await fetchFromNewsApi();
+    }
+
+    if (hasGNewsKey) {
+      return await fetchFromGNews();
+    }
+
+    return mockArticles;
+  } catch (error) {
+    console.error('Failed fetching live news, falling back to mock data.', error.message);
+    return mockArticles;
+  }
 }
 
 module.exports = { fetchBusinessNews };

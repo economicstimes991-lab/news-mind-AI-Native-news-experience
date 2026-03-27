@@ -21,6 +21,14 @@ function buildFallbackWhyItMatters(article, persona) {
   return 'This story helps you understand how business decisions create real-world impact in industries.';
 }
 
+function buildFallbackExplanation(article, persona) {
+  const lead = article.description || article.title || 'This story';
+  if (persona === 'student') {
+    return `${lead}. In simple terms: this can shift prices, jobs, or investment direction across the sector.`;
+  }
+  return `${lead}. Watch second-order effects on competition, capital flow, and customer demand.`;
+}
+
 async function runOpenAIJson(prompt) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -74,6 +82,7 @@ async function enrichArticlesForPersona(articles, persona, interests = []) {
     return articles.map((article) => ({
       ...article,
       summary: article.description || 'No summary available yet.',
+      explanation: buildFallbackExplanation(article, resolvedPersona),
       whyItMatters: buildFallbackWhyItMatters(article, resolvedPersona),
       angle: resolvedPersona,
       relevanceReason: interests.length
@@ -89,6 +98,7 @@ async function enrichArticlesForPersona(articles, persona, interests = []) {
     {
       "id": "string",
       "summary": "2 short bullet points max",
+      "explanation": "1-2 sentence context and implications",
       "whyItMatters": "1 sentence",
       "relevanceReason": "short phrase",
       "format": "signal|explainer|brief"
@@ -110,6 +120,7 @@ Articles: ${JSON.stringify(articles.map(({ id, title, description, source, publi
     return {
       ...article,
       summary: card.summary || article.description || 'No summary available yet.',
+      explanation: card.explanation || buildFallbackExplanation(article, resolvedPersona),
       whyItMatters: card.whyItMatters || buildFallbackWhyItMatters(article, resolvedPersona),
       relevanceReason: card.relevanceReason || `Tailored for ${resolvedPersona}`,
       format: card.format || 'brief',
