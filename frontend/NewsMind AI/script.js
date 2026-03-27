@@ -136,3 +136,12 @@ function addMessage(role, text) {
 
   chatBox.scrollTop = chatBox.scrollHeight;
 }
+/* Firebase wala hai */
+import { savePreferences, filterNews } from "./personalization.js";
+
+// Example interests
+const interests = ["technology", "finance"];
+
+// Example usage
+savePreferences("user1", interests);
+/* Firebase wala kahatam*/ 
