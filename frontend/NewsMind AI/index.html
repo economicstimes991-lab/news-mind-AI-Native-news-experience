@@ -1,67 +1,14 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NewsMind AI</title>
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Firebase (module support) -->
-  <script type="module" src="firebase.js"></script>
-</head>
-<body>
-
-  <!-- LANDING PAGE -->
-  <div id="landing-page" class="page">
-    <h1>NewsMind AI</h1>
-    <p>Select your interests</p>
-
-    <div class="interests">
-      <button class="interest-btn" data-value="technology">Tech</button>
-      <button class="interest-btn" data-value="sports">Sports</button>
-      <button class="interest-btn" data-value="business">Business</button>
-      <button class="interest-btn" data-value="health">Health</button>
-    </div>
-
-    <button id="start-btn">Get My News</button>
-  </div>
-
-
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="page hidden">
-
-    <!-- Navbar -->
-    <div class="navbar">
-      <h2>NewsMind AI</h2>
-      <div id="selected-interests"></div>
-    </div>
-
-    <!-- Main Layout -->
-    <div class="container">
-
-      <!-- News Section -->
-      <div class="news" id="news-container">
-        <!-- News cards will come here dynamically -->
-      </div>
-
-      <!-- Chat Section -->
-      <div class="chat">
-
-        <div class="chat-messages" id="chat-box">
-          <!-- Messages will appear here -->
-        </div>
-
-        <div class="chat-input">
-          <input type="text" id="chat-input" placeholder="Ask about news..." />
-          <button id="send-btn">Send</button>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- IMPORTANT: use module -->
-  <script type="module" src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NewsMind AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Vite dev: this loads your React app -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
